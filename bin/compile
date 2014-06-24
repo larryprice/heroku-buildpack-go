@@ -58,16 +58,16 @@ if ! (which hg >/dev/null && which bzr >/dev/null)
 then
   # Install Bazzar and Mercurial
   echo -n "-----> Installing Virtualenv..."
-  virtualenv --python python2.7 --distribute --prompt='(VENV) ' $VENV
+  virtualenv --python python2.7 --distribute --prompt='(VENV) ' $VENV > /dev/null 2>&1
   . $VENV/bin/activate
   echo " done"
 
   echo -n "-----> Installing Mercurial..."
-  pip install mercurial
+  pip install mercurial > /dev/null 2>&1
   echo " done"
 
   echo -n "-----> Installing Bazaar..."
-  pip install bzr
+  pip install bzr > /dev/null 2>&1
   echo " done"
 fi
 
