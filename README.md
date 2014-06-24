@@ -3,6 +3,10 @@ heroku-buildpack-go
 
 Opinionated buildpack for GO web applications
 
+#Acknowledgement
+
+Work is based of Keith Rarick GO buildpack (https://github.com/kr/heroku-buildpack-go)
+
 #LICENSE
 
 Copyright 2014 Julio Arias
