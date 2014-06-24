@@ -11,6 +11,10 @@ ENV_DIR=$3
 BUILDPACK_PATH=$(dirname $(dirname $(readlink -f "$0")))
 VENV=$CACHE_DIR/venv
 
+if [ ! -d "$CACHE_DIR" ]; then
+  mkdir -p $CACHE_DIR
+fi
+
 # Shortcut to call virtualenv
 virtualenv() {
   python "$BUILDPACK_PATH/vendor/virtualenv-1.9/virtualenv.py" "$@"
