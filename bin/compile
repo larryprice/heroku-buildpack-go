@@ -75,7 +75,7 @@ fi
 unset GIT_DIR
 cd $APP_DIR
 echo -n "-----> Building..."
-make stage
+make stage > /dev/null 2>&1
 rm -rf $BUILD_DIR/out
 mv out $BUILD_DIR/
 echo " done"
