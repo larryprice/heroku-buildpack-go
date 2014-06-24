@@ -58,7 +58,7 @@ if ! (which hg >/dev/null && which bzr >/dev/null)
 then
   # Install Bazzar and Mercurial
   echo -n "-----> Installing Virtualenv..."
-  virtualenv --python python2.7 --distribute --never-download --prompt='(VENV) ' $VENV
+  virtualenv --python python2.7 --distribute --prompt='(VENV) ' $VENV
   . $VENV/bin/activate
   echo " done"
 
