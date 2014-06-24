@@ -8,43 +8,50 @@ set -e
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
+BUILDPACK_PATH=$(dirname $(dirname $(readlink -f "$0")))
 VENV=$CACHE_DIR/venv
-PATH=$VENV/bin:$PATH
-
-BUILDPACK=$(dirname $(dirname $0))
 
 # Shortcut to call virtualenv
 virtualenv() {
-  python "$BUILDPACK/vendor/virtualenv-1.9/virtualenv.py" "$@"
+  python "$BUILDPACK_PATH/vendor/virtualenv-1.9/virtualenv.py" "$@"
 }
 
-if [ -f ".goconfig" ]; then
-  APP_PACKAGE=$(cat .goconfig)
+if [ -f "$BUILD_DIR/.goconfig" ]; then
+  APP_PACKAGE=$(cat $BUILD_DIR/.goconfig)
 else
   echo " !     Missing .goconfig file."
   exit 1
 fi
 
 # Setup GOPATH and GOROOT
-GOPATH=$CACHE_DIR
-GOROOT=$CACHE_DIR/go
-PATH=$GOROOT/bin:$PATH:$BUILDPACK/vendor/gpm
+GOPATH=$CACHE_DIR export GOPATH
+GOROOT=$CACHE_DIR/go export GOROOT
+PATH=$VENV/bin:$GOROOT/bin:$GOPATH/bin:$BUILDPACK_PATH/vendor/gpm:$PATH export PATH
 
-mkdir $GOPATH/src
+if [ ! -d "$GOPATH/src" ]; then
+  mkdir $GOPATH/src
+fi
+
 # Setting the app inside the GOPATH
 APP_DIR=$GOPATH/src/$APP_PACKAGE/
+if [ ! -d "$APP_DIR" ]; then
+  mkdir -p $APP_DIR
+fi
+rm -rf $APP_DIR/*
 cp -R $BUILD_DIR/* $APP_DIR
 
 # Install Go 1.3
 if [ ! -d "$CACHE_DIR/go" ]; then
   echo "-----> Installing latest GO (1.3)..."
-  curl -s "http://golang.org/dl/go1.3.linux-amd64.tar.gz" | tar xz
+  curl -s "https://storage.googleapis.com/golang/go1.3.linux-amd64.tar.gz" | tar xz
   mv go $CACHE_DIR/
+  echo " done"
 else
   echo "-----> Looks like GO is already installed"
 fi
 
-if [ ! which hg >/dev/null && which bzr >/dev/null ]; then
+if ! (which hg >/dev/null && which bzr >/dev/null)
+then
   # Install Bazzar and Mercurial
   echo "-----> Installing Virtualenv..."
   virtualenv --python python2.7 --distribute --never-download --prompt='(VENV) ' $VENV > /dev/null 2>&1
@@ -64,7 +71,9 @@ fi
 cd $APP_DIR
 echo "-----> Building..."
 make stage
+rm -rf $BUILD_DIR/out
 mv out $BUILD_DIR/
+echo " done"
 
 mkdir -p $BUILD_DIR/.profile.d
 echo 'PATH=$PATH:$HOME/out' > $BUILD_DIR/.profile.d/go.sh
