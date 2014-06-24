@@ -42,7 +42,7 @@ cp -R $BUILD_DIR/* $APP_DIR
 
 # Install Go 1.3
 if [ ! -d "$CACHE_DIR/go" ]; then
-  echo "-----> Installing latest GO (1.3)..."
+  echo -n "-----> Installing latest GO (1.3)..."
   curl -s "https://storage.googleapis.com/golang/go1.3.linux-amd64.tar.gz" | tar xz
   mv go $CACHE_DIR/
   echo " done"
@@ -53,23 +53,23 @@ fi
 if ! (which hg >/dev/null && which bzr >/dev/null)
 then
   # Install Bazzar and Mercurial
-  echo "-----> Installing Virtualenv..."
-  virtualenv --python python2.7 --distribute --never-download --prompt='(VENV) ' $VENV > /dev/null 2>&1
-  . $VENV/bin/activate > /dev/null 2>&1
+  echo -n "-----> Installing Virtualenv..."
+  virtualenv --python python2.7 --distribute --never-download --prompt='(VENV) ' $VENV
+  . $VENV/bin/activate
   echo " done"
 
-  echo "-----> Installing Mercurial..."
-  pip install mercurial > /dev/null 2>&1
+  echo -n "-----> Installing Mercurial..."
+  pip install mercurial
   echo " done"
 
-  echo "-----> Installing Bazaar..."
-  pip install bzr > /dev/null 2>&1
+  echo -n "-----> Installing Bazaar..."
+  pip install bzr
   echo " done"
 fi
 
 # Build the application
 cd $APP_DIR
-echo "-----> Building..."
+echo -n "-----> Building..."
 make stage
 rm -rf $BUILD_DIR/out
 mv out $BUILD_DIR/
