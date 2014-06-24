@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir> <env-dir>
+
+# fail fast
+set -e
+
+# parse args
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+VENV=$CACHE_DIR/venv
+PATH=$VENV/bin:$PATH
+
+BUILDPACK=$(dirname $(dirname $0))
+
+# Shortcut to call virtualenv
+virtualenv() {
+  python "$BUILDPACK/vendor/virtualenv-1.9/virtualenv.py" "$@"
+}
+
+if [ -f ".goconfig" ]; then
+  APP_PACKAGE=$(cat .goconfig)
+else
+  echo " !     Missing .goconfig file."
+  exit 1
+fi
+
+# Setup GOPATH and GOROOT
+GOPATH=$CACHE_DIR
+GOROOT=$CACHE_DIR/go
+PATH=$GOROOT/bin:$PATH:$BUILDPACK/vendor/gpm
+
+mkdir $GOPATH/src
+# Setting the app inside the GOPATH
+APP_DIR=$GOPATH/src/$APP_PACKAGE/
+cp -R $BUILD_DIR/* $APP_DIR
+
+# Install Go 1.3
+if [ ! -d "$CACHE_DIR/go" ]; then
+  echo "-----> Installing latest GO (1.3)..."
+  curl -s "http://golang.org/dl/go1.3.linux-amd64.tar.gz" | tar xz
+  mv go $CACHE_DIR/
+else
+  echo "-----> Looks like GO is already installed"
+fi
+
+if [ ! which hg >/dev/null && which bzr >/dev/null ]; then
+  # Install Bazzar and Mercurial
+  echo "-----> Installing Virtualenv..."
+  virtualenv --python python2.7 --distribute --never-download --prompt='(VENV) ' $VENV > /dev/null 2>&1
+  . $VENV/bin/activate > /dev/null 2>&1
+  echo " done"
+
+  echo "-----> Installing Mercurial..."
+  pip install mercurial > /dev/null 2>&1
+  echo " done"
+
+  echo "-----> Installing Bazaar..."
+  pip install bzr > /dev/null 2>&1
+  echo " done"
+fi
+
+# Build the application
+cd $APP_DIR
+echo "-----> Building..."
+make stage
+mv out $BUILD_DIR/
+
+mkdir -p $BUILD_DIR/.profile.d
+echo 'PATH=$PATH:$HOME/out' > $BUILD_DIR/.profile.d/go.sh
