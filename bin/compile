@@ -46,8 +46,8 @@ cp -R $BUILD_DIR/* $APP_DIR
 
 # Install Go 1.3
 if [ ! -d "$CACHE_DIR/go" ]; then
-  echo -n "-----> Installing latest GO (1.3)..."
-  curl -s "https://storage.googleapis.com/golang/go1.3.linux-amd64.tar.gz" | tar xz
+  echo -n "-----> Installing latest Go (1.4)..."
+  curl -s "https://storage.googleapis.com/golang/go1.4.linux-amd64.tar.gz" | tar xz
   mv go $CACHE_DIR/
   echo " done"
 else
